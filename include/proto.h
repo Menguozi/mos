@@ -66,9 +66,16 @@ PUBLIC void in_process(TTY* p_tty, u32 key);
 PUBLIC void task_sys();
 
 /* fs/main.c */
-PUBLIC void task_fs();
-PUBLIC int  rw_sector(int io_type, int dev, u64 pos, int bytes, int proc_nr,
-		      void * buf);
+PUBLIC void			task_fs();
+PUBLIC int			rw_sector(int io_type, int dev, u64 pos,
+					  int bytes, int proc_nr, void * buf);
+
+/* fs/open.c */
+PUBLIC int		do_open();
+PUBLIC int		do_close();
+
+/* fs/misc.c */
+PUBLIC int		do_stat();
 
 /* console.c */
 PUBLIC void out_char(CONSOLE* p_con, char ch);

@@ -38,5 +38,9 @@ extern  CONSOLE		console_table[];
 extern	u8 *			fsbuf;
 extern	const int		FSBUF_SIZE;
 extern	struct dev_drv_map	dd_map[];
-
 EXTERN  struct fat16_t fat16;
+EXTERN	struct file_desc	f_desc_table[NR_FILE_DESC];
+extern	const int		FSBUF_SIZE;
+EXTERN	MESSAGE			fs_msg;
+EXTERN	struct proc *		pcaller;
+EXTERN	struct inode *		root_inode;

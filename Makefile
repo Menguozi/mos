@@ -30,8 +30,8 @@ OBJS		= kernel/kernel.o kernel/syscall.o kernel/start.o kernel/main.o\
 			kernel/i8259.o kernel/global.o kernel/protect.o kernel/proc.o\
 			kernel/systask.o kernel/hd.o\
 			kernel/printf.o kernel/vsprintf.o\
-			lib/kliba.o lib/klib.o lib/string.o lib/misc.o\
-			fs/main.o
+			lib/kliba.o lib/klib.o lib/string.o lib/misc.o lib/open.o lib/close.o\
+			fs/main.o fs/open.o
 DASMOUTPUT	= kernel.bin.asm
 
 # All Phony Targets
@@ -138,5 +138,14 @@ lib/kliba.o : lib/kliba.asm
 lib/string.o : lib/string.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
+lib/open.o : lib/open.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+lib/close.o : lib/close.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 fs/main.o: fs/main.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+fs/open.o: fs/open.c
 	$(CC) $(CFLAGS) -o $@ $<

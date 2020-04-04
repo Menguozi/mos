@@ -124,41 +124,26 @@ PUBLIC int get_ticks()
                                TestA
  *======================================================================*/
 void TestA()
-{
-	for(;;);
-	while (1) {
-		printf("<Ticks:%d>", get_ticks());
-		milli_delay(200);
-	}
-
+{	
+	int fd;
+	int n;
+	const char filename[] = "blah";
+	fd = open(filename, O_CREAT | O_RDWR);
+	assert(fd != -1);
+	printf("File blah created. fd: %d\n", fd);
 	
-
-	int ret;
-
-	struct fat16_dir_t dir;
-	ret = fat16_dir_open(&fat16,
-                   &dir,
-                   "HOME",
-                   O_CREAT | O_WRITE | O_SYNC);
-	printl("fat16_dir_open ret: %d\n", ret);
+	fd = open("menguozi.txt", O_CREAT | O_RDWR);
+	assert(fd != -1);
+	printf("File menguozi.txt created. fd: %d\n", fd);
 	
-	ret = fat16_dir_close(&dir);
-	printl("fat16_dir_close ret: %d\n", ret);
+	close(0);
+	printf("File blah closed. fd: %d\n", 0);
 
-	struct fat16_file_t file;
-	ret = fat16_file_open(&fat16,
-                    &file,
-                    "TEST.TXT",
-                    O_WRONLY | O_CREAT);
-	printl("fat16_file_open ret: %d\n", ret);
+	fd = open("TEST.txt", O_CREAT | O_RDWR);
+	assert(fd != -1);
+	printf("File created. fd: %d\n", fd);
 
-	char *buf_p = "Menguozi's FAT16 is the best\0";
-	fat16_file_write(&file,
-                         buf_p,
-                         strlen(buf_p));
-	
-	ret = fat16_file_close(&file);
-	printl("fat16_file_close ret: %d\n", ret);
+	spin("TestA");
 }
 
 /*======================================================================*

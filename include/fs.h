@@ -708,7 +708,8 @@ struct dev_drv_map {
 struct file_desc {
 	int		fd_mode;	/**< R or W */
 	int		fd_pos;		/**< Current position for R/W. */
-	struct inode*	fd_inode;	/**< Ptr to the i-node */
+	struct fat16_file_t*	fd_file;	/**< Ptr to the i-node */
+	int		fd_cnt;
 };
 
 

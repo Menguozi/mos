@@ -64,6 +64,8 @@ struct proc {
 				    */
 
 	int nr_tty;
+
+	struct file_desc * filp[NR_FILES];
 };
 
 struct task {

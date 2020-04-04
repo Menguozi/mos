@@ -11,6 +11,7 @@
 #include "config.h"
 #include "const.h"
 #include "protect.h"
+#include "stdio.h"
 #include "string.h"
 #include "fs.h"
 #include "proc.h"
@@ -1676,9 +1677,12 @@ PRIVATE void mkfs();
  *****************************************************************************/
 PUBLIC void task_fs()
 {
-	printl("Task FS begins.\n");
+	printl("Task Fat16_FS begins.\n");
 
-	/*while (1) {
+	init_fs();
+
+	while (1) {
+
 		send_recv(RECEIVE, ANY, &fs_msg);
 
 		int src = fs_msg.source;
@@ -1687,10 +1691,10 @@ PUBLIC void task_fs()
 		switch (fs_msg.type) {
 		case OPEN:
 			fs_msg.FD = do_open();
-			break;*/
-		/*case CLOSE:
+			break;
+		case CLOSE:
 			fs_msg.RETVAL = do_close();
-			break;*/
+			break;
 		/* case READ: */
 		/* case WRITE: */
 		/* 	fs_msg.CNT = do_rdwt(); */
@@ -1713,18 +1717,16 @@ PUBLIC void task_fs()
 		/* case STAT: */
 		/* 	fs_msg.RETVAL = do_stat(); */
 		/* 	break; */
-		/*default:
-			dump_msg("FS::unknown message:", &fs_msg);
+		default:
+			dump_msg("Fat16_FS::unknown message:", &fs_msg);
 			assert(0);
 			break;
-		}*/
+		}
 
 		/* reply */
-		/*fs_msg.type = SYSCALL_RET;
+ 		fs_msg.type = SYSCALL_RET;
 		send_recv(SEND, src, &fs_msg);
-	}*/
-
-	init_fs();
+	}
 }
 
 /*****************************************************************************
@@ -1736,6 +1738,12 @@ PUBLIC void task_fs()
  *****************************************************************************/
 PRIVATE void init_fs()
 {
+	int i;
+
+	/* f_desc_table[] */
+	for (i = 0; i < NR_FILE_DESC; i++)
+		memset(&f_desc_table[i], 0, sizeof(struct file_desc));
+
 	/* open the device: hard disk */
 	MESSAGE driver_msg;
 	driver_msg.type = DEV_OPEN;
@@ -1743,6 +1751,7 @@ PRIVATE void init_fs()
 	assert(dd_map[MAJOR(ROOT_DEV)].driver_nr != INVALID_DRIVER);
 	send_recv(BOTH, dd_map[MAJOR(ROOT_DEV)].driver_nr, &driver_msg);
 
+	/* make FS */
 	mkfs();
 }
 
@@ -1773,20 +1782,18 @@ PRIVATE void mkfs()
 	send_recv(BOTH, dd_map[MAJOR(ROOT_DEV)].driver_nr, &driver_msg);
 
 	printl("\n\n");
-	printl("< Fat16_FS > dev size: 0x%x sectors\n", geo.size);
+	printl("Fat16_FS dev size: 0x%x sectors\n", geo.size);
 
-	fat16_init(&fat16,
-               read,
-               write);
+	fat16_init(&fat16, read, write);
 
 	fat16_format(&fat16);
 
 	fat16_mount(&fat16);
 
-	printl("< Fat16_FS > volume_start_block: #%d sector\n", fat16.volume_start_block);
-	printl("< Fat16_FS > fat_start_block: #%d sector\n", fat16.fat_start_block);
-	printl("< Fat16_FS > root_dir_start_block: #%d sector\n", fat16.root_dir_start_block);
-	printl("< Fat16_FS > data_start_block: #%d sector\n", fat16.data_start_block);
+	printl("Fat16_FS volume_start_block: #%d sector\n", fat16.volume_start_block);
+	printl("Fat16_FS fat_start_block: #%d sector\n", fat16.fat_start_block);
+	printl("Fat16_FS root_dir_start_block: #%d sector\n", fat16.root_dir_start_block);
+	printl("Fat16_FS data_start_block: #%d sector\n", fat16.data_start_block);
 }
 
 /*****************************************************************************
