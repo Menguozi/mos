@@ -8,6 +8,9 @@
 #ifndef	_ORANGES_TYPE_H_
 #define	_ORANGES_TYPE_H_
 
+/* routine types */
+#define	PUBLIC		/* PUBLIC is the opposite of PRIVATE */
+#define	PRIVATE	static	/* PRIVATE x limits the scope of x */
 
 typedef	unsigned long long	u64;
 typedef	unsigned int		u32;

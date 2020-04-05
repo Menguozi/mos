@@ -29,8 +29,25 @@ void assertion_failure(char *exp, char *file, char *base_file, int line);
 /* 库函数 */
 /*--------*/
 
+#ifdef ENABLE_DISK_LOG
+#define SYSLOG syslog
+#endif
+
 /* lib/open.c */
-int	open		(const char *pathname, int flags);
+PUBLIC	int	open		(const char *pathname, int flags);
 
 /* lib/close.c */
-int	close		(int fd);
+PUBLIC	int	close		(int fd);
+
+/* lib/read.c */
+PUBLIC int	read		(int fd, void *buf, int count);
+
+/* lib/write.c */
+PUBLIC int	write		(int fd, const void *buf, int count);
+
+/* lib/unlink.c */
+PUBLIC	int	unlink		(const char *pathname);
+
+/* lib/getpid.c */
+PUBLIC int	getpid		();
+

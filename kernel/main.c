@@ -6,6 +6,7 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
+#include "stdio.h"
 #include "const.h"
 #include "protect.h"
 #include "string.h"
@@ -31,7 +32,7 @@ PUBLIC int kernel_main()
         u8    privilege;
         u8    rpl;
 	int   eflags;
-	int   i;
+	int   i, j;
 	int   prio;
 	for (i = 0; i < NR_TASKS+NR_PROCS; i++) {
 	        if (i < NR_TASKS) {     /* 任务 */
@@ -71,7 +72,7 @@ PUBLIC int kernel_main()
 		p_proc->regs.esp = (u32)p_task_stack;
 		p_proc->regs.eflags = eflags;
 
-		p_proc->nr_tty		= 0;
+		/* p_proc->nr_tty		= 0; */
 
 		p_proc->p_flags = 0;
 		p_proc->p_msg = 0;
@@ -81,6 +82,9 @@ PUBLIC int kernel_main()
 		p_proc->q_sending = 0;
 		p_proc->next_sending = 0;
 
+		for (j = 0; j < NR_FILES; j++)
+			p_proc->filp[j] = 0;
+
 		p_proc->ticks = p_proc->priority = prio;
 
 		p_task_stack -= p_task->stacksize;
@@ -89,9 +93,9 @@ PUBLIC int kernel_main()
 		selector_ldt += 1 << 3;
 	}
 
-        proc_table[NR_TASKS + 0].nr_tty = 0;
-        proc_table[NR_TASKS + 1].nr_tty = 1;
-        proc_table[NR_TASKS + 2].nr_tty = 1;
+        /* proc_table[NR_TASKS + 0].nr_tty = 0; */
+        /* proc_table[NR_TASKS + 1].nr_tty = 1; */
+        /* proc_table[NR_TASKS + 2].nr_tty = 1; */
 
 	k_reenter = 0;
 	ticks = 0;
@@ -124,24 +128,62 @@ PUBLIC int get_ticks()
                                TestA
  *======================================================================*/
 void TestA()
-{	
+{
 	int fd;
-	int n;
-	const char filename[] = "blah";
+	int i, n;
+
+	char filename[MAX_FILENAME_LEN+1] = "blah";
+	const char bufw[] = "abcde";
+	const int rd_bytes = 3;
+	char bufr[rd_bytes];
+
+	assert(rd_bytes <= strlen(bufw));
+
+	/* create */
 	fd = open(filename, O_CREAT | O_RDWR);
 	assert(fd != -1);
-	printf("File blah created. fd: %d\n", fd);
-	
-	fd = open("menguozi.txt", O_CREAT | O_RDWR);
-	assert(fd != -1);
-	printf("File menguozi.txt created. fd: %d\n", fd);
-	
-	close(0);
-	printf("File blah closed. fd: %d\n", 0);
+	printl("File created: %s (fd %d)\n", filename, fd);
 
-	fd = open("TEST.txt", O_CREAT | O_RDWR);
+	/* write */
+	/*n = write(fd, bufw, strlen(bufw));
+	assert(n == strlen(bufw));*/
+
+	/* close */
+	close(fd);
+
+	/* open */
+	/*fd = open(filename, O_RDWR);
 	assert(fd != -1);
-	printf("File created. fd: %d\n", fd);
+	printl("File opened. fd: %d\n", fd);*/
+
+	/* read */
+	/*n = read(fd, bufr, rd_bytes);
+	assert(n == rd_bytes);
+	bufr[n] = 0;
+	printl("%d bytes read: %s\n", n, bufr);*/
+
+	/* close */
+	/*close(fd);*/
+
+	/*char * filenames[] = {"/foo", "/bar", "/baz"};*/
+
+	/* create files */
+	/*for (i = 0; i < sizeof(filenames) / sizeof(filenames[0]); i++) {
+		fd = open(filenames[i], O_CREAT | O_RDWR);
+		assert(fd != -1);
+		printl("File created: %s (fd %d)\n", filenames[i], fd);
+		close(fd);
+	}*/
+
+	/*char * rfilenames[] = {"/bar", "/foo", "/baz", "/dev_tty0"};*/
+
+	/* remove files */
+	/*for (i = 0; i < sizeof(rfilenames) / sizeof(rfilenames[0]); i++) {
+		if (unlink(rfilenames[i]) == 0)
+			printl("File removed: %s\n", rfilenames[i]);
+		else
+			printl("Failed to remove file: %s\n", rfilenames[i]);
+	}*/
 
 	spin("TestA");
 }
@@ -151,10 +193,29 @@ void TestA()
  *======================================================================*/
 void TestB()
 {
-	while(1){
-		printf("B");
-		milli_delay(200);
-	}
+	/*char tty_name[] = "/dev_tty1";
+
+	int fd_stdin  = open(tty_name, O_RDWR);
+	assert(fd_stdin  == 0);
+	int fd_stdout = open(tty_name, O_RDWR);
+	assert(fd_stdout == 1);
+
+	char rdbuf[128];
+
+	while (1) {
+		printf("$ ");
+		int r = read(fd_stdin, rdbuf, 70);
+		rdbuf[r] = 0;
+
+		if (strcmp(rdbuf, "hello") == 0)
+			printf("hello world!\n");
+		else
+			if (rdbuf[0])
+				printf("{%s}\n", rdbuf);
+	}*/
+	spin("TestB");
+
+	assert(0); /* never arrive here */
 }
 
 /*======================================================================*
@@ -162,11 +223,8 @@ void TestB()
  *======================================================================*/
 void TestC()
 {
-	/* assert(0); */
-	while(1){
-		printf("C");
-		milli_delay(200);
-	}
+	spin("TestC");
+	assert(0);
 }
 
 /*****************************************************************************
@@ -174,14 +232,13 @@ void TestC()
  *****************************************************************************/
 PUBLIC void panic(const char *fmt, ...)
 {
-	//int i;
+	int i;
 	char buf[256];
 
 	/* 4 is the size of fmt in the stack */
 	va_list arg = (va_list)((char*)&fmt + 4);
 
-	//i = 
-	vsprintf(buf, fmt, arg);
+	i = vsprintf(buf, fmt, arg);
 
 	printl("%c !!panic!! %s", MAG_CH_PANIC, buf);
 

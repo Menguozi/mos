@@ -8,6 +8,7 @@
 #define GLOBAL_VARIABLES_HERE
 
 #include "type.h"
+#include "stdio.h"
 #include "const.h"
 #include "protect.h"
 #include "fs.h"
@@ -65,3 +66,5 @@ struct dev_drv_map dd_map[] = {
  */
 PUBLIC	u8 *		fsbuf		= (u8*)0x600000;
 PUBLIC	const int	FSBUF_SIZE	= 0x100000;
+
+

@@ -137,7 +137,7 @@ static int8_t fs_strcmp (const char* a, const char* b) {
 /**
  * Block read function callback.
  */
-ssize_t read(void *dst_p,
+ssize_t read_block(void *dst_p,
                uint32_t src_block)
 {
 	RD_SECT(ROOT_DEV, src_block);
@@ -148,7 +148,7 @@ ssize_t read(void *dst_p,
 /**
  * Block write function callback.
  */
-ssize_t write(uint32_t dst_block,
+ssize_t write_block(uint32_t dst_block,
                          const void *src_p)
 {
 	fs_memcpy(fsbuf, src_p, BLOCK_SIZE);
@@ -1695,13 +1695,13 @@ PUBLIC void task_fs()
 		case CLOSE:
 			fs_msg.RETVAL = do_close();
 			break;
-		/* case READ: */
-		/* case WRITE: */
-		/* 	fs_msg.CNT = do_rdwt(); */
-		/* 	break; */
-		/* case LSEEK: */
-		/* 	fs_msg.OFFSET = do_lseek(); */
-		/* 	break; */
+		case READ:
+		case WRITE:
+			fs_msg.CNT = do_rdwt();
+			break;
+		/* case LSEEK: 
+			fs_msg.OFFSET = do_lseek();
+			break;*/
 		/* case UNLINK: */
 		/* 	fs_msg.RETVAL = do_unlink(); */
 		/* 	break; */
@@ -1781,19 +1781,19 @@ PRIVATE void mkfs()
 	assert(dd_map[MAJOR(ROOT_DEV)].driver_nr != INVALID_DRIVER);
 	send_recv(BOTH, dd_map[MAJOR(ROOT_DEV)].driver_nr, &driver_msg);
 
-	printl("\n\n");
-	printl("Fat16_FS dev size: 0x%x sectors\n", geo.size);
+	printl("\nFat16_FS\n");
+	printl("         dev size: 0x%x sectors\n", geo.size);
 
-	fat16_init(&fat16, read, write);
+	fat16_init(&fat16, read_block, write_block);
 
 	fat16_format(&fat16);
 
 	fat16_mount(&fat16);
 
-	printl("Fat16_FS volume_start_block: #%d sector\n", fat16.volume_start_block);
-	printl("Fat16_FS fat_start_block: #%d sector\n", fat16.fat_start_block);
-	printl("Fat16_FS root_dir_start_block: #%d sector\n", fat16.root_dir_start_block);
-	printl("Fat16_FS data_start_block: #%d sector\n", fat16.data_start_block);
+	printl("         volume_start_block: #%d sector\n", fat16.volume_start_block);
+	printl("         fat_start_block: #%d sector\n", fat16.fat_start_block);
+	printl("         root_dir_start_block: #%d sector\n", fat16.root_dir_start_block);
+	printl("         data_start_block: #%d sector\n", fat16.data_start_block);
 }
 
 /*****************************************************************************
