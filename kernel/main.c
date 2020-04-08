@@ -133,7 +133,7 @@ void TestA()
 	int i, n;
 
 	char filename[MAX_FILENAME_LEN+1] = "blah";
-	const char bufw[] = "abcde";
+	const char bufw[] = "menguozi";
 	const int rd_bytes = 3;
 	char bufr[rd_bytes];
 
@@ -145,37 +145,39 @@ void TestA()
 	printl("File created: %s (fd %d)\n", filename, fd);
 
 	/* write */
-	/*n = write(fd, bufw, strlen(bufw));
-	assert(n == strlen(bufw));*/
+	int len = strlen(bufw);
+	n = write(fd, bufw, strlen(bufw));
+	printl("n = write(fd, bufw, strlen(bufw)) %d\n", n);
+	assert(n == strlen(bufw));
 
 	/* close */
 	close(fd);
 
 	/* open */
-	/*fd = open(filename, O_RDWR);
+	fd = open(filename, O_RDWR);
 	assert(fd != -1);
-	printl("File opened. fd: %d\n", fd);*/
+	printl("File opened. fd: %d\n", fd);
 
 	/* read */
-	/*n = read(fd, bufr, rd_bytes);
+	n = read(fd, bufr, rd_bytes);
 	assert(n == rd_bytes);
 	bufr[n] = 0;
-	printl("%d bytes read: %s\n", n, bufr);*/
+	printl("%d bytes read: %s\n", n, bufr);
 
 	/* close */
-	/*close(fd);*/
+	close(fd);
 
-	/*char * filenames[] = {"/foo", "/bar", "/baz"};*/
+	char * filenames[] = {"foo", "bar", "baz"};
 
 	/* create files */
-	/*for (i = 0; i < sizeof(filenames) / sizeof(filenames[0]); i++) {
+	for (i = 0; i < sizeof(filenames) / sizeof(filenames[0]); i++) {
 		fd = open(filenames[i], O_CREAT | O_RDWR);
 		assert(fd != -1);
 		printl("File created: %s (fd %d)\n", filenames[i], fd);
 		close(fd);
-	}*/
+	}
 
-	/*char * rfilenames[] = {"/bar", "/foo", "/baz", "/dev_tty0"};*/
+	char * rfilenames[] = {"/bar", "/foo", "/baz", "/dev_tty0"};
 
 	/* remove files */
 	/*for (i = 0; i < sizeof(rfilenames) / sizeof(rfilenames[0]); i++) {

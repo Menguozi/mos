@@ -70,7 +70,11 @@ PUBLIC int do_open()
 	if (fat16_file_open(&fat16, &file, pathname, flags))
 		fd = -1;
 	else {
+
+			printl("file_size = %d\n", file.file_size);
+			printl("cur_position = %d\n", file.cur_position);
 		pcaller->filp[fd] = &f_desc_table[i];
+		f_desc_table[i].fd_mode = flags;
 		f_desc_table[i].fd_file = &file;
 		f_desc_table[i].fd_cnt++;
 	}
@@ -89,6 +93,8 @@ PUBLIC int do_open()
 PUBLIC int do_close()
 {
 	int fd = fs_msg.FD;
+			printl("file_size = %d\n", pcaller->filp[fd]->fd_file->file_size);
+			printl("cur_position = %d\n", pcaller->filp[fd]->fd_file->cur_position);
 	fat16_file_close(pcaller->filp[fd]->fd_file);
 	pcaller->filp[fd]->fd_file = 0;
 	pcaller->filp[fd] = 0;
