@@ -48,11 +48,11 @@ PUBLIC int do_rdwt()
 
 	struct fat16_file_t *file_p = pcaller->filp[fd]->fd_file;
 
-	/*if (imode == I_CHAR_SPECIAL) {
+	if (fd < 3) {
 		int t = fs_msg.type == READ ? DEV_READ : DEV_WRITE;
 		fs_msg.type = t;
 
-		int dev = pin->i_start_sect;
+		int dev = MAKE_DEV(DEV_CHAR_TTY, 0);
 		assert(MAJOR(dev) == 4);
 
 		fs_msg.DEVICE	= MINOR(dev);
@@ -64,8 +64,8 @@ PUBLIC int do_rdwt()
 		assert(fs_msg.CNT == len);
 
 		return fs_msg.CNT;
-	}*/
-	//else {
+	}
+	else {
 		assert((fs_msg.type == READ) || (fs_msg.type == WRITE));
 
 		int bytes_rw = 0;
@@ -89,5 +89,5 @@ PUBLIC int do_rdwt()
 		}
 
 		return bytes_rw;
-	//}
+	}
 }

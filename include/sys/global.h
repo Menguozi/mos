@@ -40,6 +40,12 @@ extern	irq_handler	irq_table[];
 extern	TTY		tty_table[];
 extern  CONSOLE		console_table[];
 
+/* MM */
+EXTERN	MESSAGE			mm_msg;
+extern	u8 *			mmbuf;
+extern	const int		MMBUF_SIZE;
+EXTERN	int			memory_size;
+
 /* FS */
 extern	u8 *			fsbuf;
 extern	const int		FSBUF_SIZE;
@@ -50,3 +56,8 @@ extern	const int		FSBUF_SIZE;
 EXTERN	MESSAGE			fs_msg;
 EXTERN	struct proc *		pcaller;
 
+/* for test only */
+extern	char *			logbuf;
+extern	const int		LOGBUF_SIZE;
+extern	char *			logdiskbuf;
+extern	const int		LOGDISKBUF_SIZE;

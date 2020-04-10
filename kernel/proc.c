@@ -181,7 +181,7 @@ PUBLIC void* va2la(int pid, void* va)
 	u32 seg_base = ldt_seg_linear(p, INDEX_LDT_RW);
 	u32 la = seg_base + (u32)va;
 
-	if (pid < NR_TASKS + NR_PROCS) {
+	if (pid < NR_TASKS + NR_NATIVE_PROCS) {
 		assert(la == (u32)va);
 	}
 
@@ -587,7 +587,7 @@ PUBLIC void dump_proc(struct proc* p)
 	sprintf(info, "ldt_sel: 0x%x.  ", p->ldt_sel); disp_color_str(info, text_color);
 	sprintf(info, "ticks: 0x%x.  ", p->ticks); disp_color_str(info, text_color);
 	sprintf(info, "priority: 0x%x.  ", p->priority); disp_color_str(info, text_color);
-	sprintf(info, "pid: 0x%x.  ", p->pid); disp_color_str(info, text_color);
+	/* sprintf(info, "pid: 0x%x.  ", p->pid); disp_color_str(info, text_color); */
 	sprintf(info, "name: %s.  ", p->name); disp_color_str(info, text_color);
 	disp_color_str("\n", text_color);
 	sprintf(info, "p_flags: 0x%x.  ", p->p_flags); disp_color_str(info, text_color);

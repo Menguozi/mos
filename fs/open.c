@@ -70,9 +70,6 @@ PUBLIC int do_open()
 	if (fat16_file_open(&fat16, &file, pathname, flags))
 		fd = -1;
 	else {
-
-			printl("file_size = %d\n", file.file_size);
-			printl("cur_position = %d\n", file.cur_position);
 		pcaller->filp[fd] = &f_desc_table[i];
 		f_desc_table[i].fd_mode = flags;
 		f_desc_table[i].fd_file = &file;
@@ -93,8 +90,6 @@ PUBLIC int do_open()
 PUBLIC int do_close()
 {
 	int fd = fs_msg.FD;
-			printl("file_size = %d\n", pcaller->filp[fd]->fd_file->file_size);
-			printl("cur_position = %d\n", pcaller->filp[fd]->fd_file->cur_position);
 	fat16_file_close(pcaller->filp[fd]->fd_file);
 	pcaller->filp[fd]->fd_file = 0;
 	pcaller->filp[fd] = 0;
@@ -111,14 +106,14 @@ PUBLIC int do_close()
  * @return The new offset in bytes from the beginning of the file if successful,
  *         otherwise a negative number.
  *****************************************************************************/
-/*PUBLIC int do_lseek()
+PUBLIC int do_lseek()
 {
 	int fd = fs_msg.FD;
 	int off = fs_msg.OFFSET;
 	int whence = fs_msg.WHENCE;
 
-	int pos = pcaller->filp[fd]->fd_pos;
-	int f_size = pcaller->filp[fd]->fd_inode->i_size;
+	//int pos = pcaller->filp[fd]->fd_pos;
+	/*int f_size = pcaller->filp[fd]->fd_inode->i_size;
 
 	switch (whence) {
 	case SEEK_SET:
@@ -137,6 +132,6 @@ PUBLIC int do_close()
 	if ((pos > f_size) || (pos < 0)) {
 		return -1;
 	}
-	pcaller->filp[fd]->fd_pos = pos;
-	return pos;
-}*/
+	pcaller->filp[fd]->fd_pos = pos;*/
+	return 0;
+}

@@ -45,7 +45,5 @@ PUBLIC int do_unlink()
 		  name_len);
 	pathname[name_len] = 0;
 
-	
-
 	return 0;
 }

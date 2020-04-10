@@ -1667,6 +1667,8 @@ int fat16_stat(struct fat16_t *self_p,
 
 PRIVATE void init_fs();
 PRIVATE void mkfs();
+PRIVATE int fs_fork();
+PRIVATE int fs_exit();
 
 /*****************************************************************************
  *                                task_fs
@@ -1699,21 +1701,21 @@ PUBLIC void task_fs()
 		case WRITE:
 			fs_msg.CNT = do_rdwt();
 			break;
-		/* case LSEEK: 
+		case LSEEK: 
 			fs_msg.OFFSET = do_lseek();
-			break;*/
-		/* case UNLINK: */
-		/* 	fs_msg.RETVAL = do_unlink(); */
-		/* 	break; */
-		/* case RESUME_PROC: */
-		/* 	src = fs_msg.PROC_NR; */
-		/* 	break; */
-		/* case FORK: */
-		/* 	fs_msg.RETVAL = fs_fork(); */
-		/* 	break; */
-		/* case EXIT: */
-		/* 	fs_msg.RETVAL = fs_exit(); */
-		/* 	break; */
+			break;
+		case UNLINK:
+			fs_msg.RETVAL = do_unlink();
+			break;
+		case RESUME_PROC:
+			src = fs_msg.PROC_NR;
+			break;
+		case FORK:
+			fs_msg.RETVAL = fs_fork();
+			break;
+		case EXIT:
+			fs_msg.RETVAL = fs_exit();
+			break;
 		/* case STAT: */
 		/* 	fs_msg.RETVAL = do_stat(); */
 		/* 	break; */
@@ -1794,6 +1796,22 @@ PRIVATE void mkfs()
 	printl("         fat_start_block: #%d sector\n", fat16.fat_start_block);
 	printl("         root_dir_start_block: #%d sector\n", fat16.root_dir_start_block);
 	printl("         data_start_block: #%d sector\n", fat16.data_start_block);
+
+	struct fat16_file_t dev_tty0;
+	struct fat16_file_t dev_tty1;
+	struct fat16_file_t dev_tty2;
+
+	int ret;
+	if(!fat16_file_open(&fat16, &dev_tty0, "dev_tty0.ch", O_RDWR | O_CREAT))
+		printl("\n         dev_tty0.ch created successfully!\n");
+	if(!fat16_file_open(&fat16, &dev_tty1, "dev_tty1.ch", O_RDWR | O_CREAT))
+		printl("         dev_tty1.ch created successfully!\n");
+	if(!fat16_file_open(&fat16, &dev_tty2, "dev_tty2.ch", O_RDWR | O_CREAT))
+		printl("         dev_tty2.ch created successfully!\n\n");
+
+	fat16_file_close(&dev_tty0);
+	fat16_file_close(&dev_tty0);
+	fat16_file_close(&dev_tty0);
 }
 
 /*****************************************************************************
@@ -1825,6 +1843,54 @@ PUBLIC int rw_sector(int io_type, int dev, u64 pos, int bytes, int proc_nr,
 	assert(dd_map[MAJOR(dev)].driver_nr != INVALID_DRIVER);
 	send_recv(BOTH, dd_map[MAJOR(dev)].driver_nr, &driver_msg);
 
+	return 0;
+}
+
+/*****************************************************************************
+ *                                fs_fork
+ *****************************************************************************/
+/**
+ * Perform the aspects of fork() that relate to files.
+ * 
+ * @return Zero if success, otherwise a negative integer.
+ *****************************************************************************/
+PRIVATE int fs_fork()
+{
+	int i;
+	struct proc* child = &proc_table[fs_msg.PID];
+	for (i = 0; i < NR_FILES; i++) {
+		if (child->filp[i]) {
+			child->filp[i]->fd_cnt++;
+			//child->filp[i]->fd_inode->i_cnt++;
+		}
+	}
+
+	return 0;
+}
+
+
+/*****************************************************************************
+ *                                fs_exit
+ *****************************************************************************/
+/**
+ * Perform the aspects of exit() that relate to files.
+ * 
+ * @return Zero if success.
+ *****************************************************************************/
+PRIVATE int fs_exit()
+{
+	int i;
+	struct proc* p = &proc_table[fs_msg.PID];
+	for (i = 0; i < NR_FILES; i++) {
+		if (p->filp[i]) {
+			/* release the inode */
+			//p->filp[i]->fd_inode->i_cnt--;
+			/* release the file desc slot */
+			if (--p->filp[i]->fd_cnt == 0)
+				p->filp[i]->fd_file = 0;
+			p->filp[i] = 0;
+		}
+	}
 	return 0;
 }
 
