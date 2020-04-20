@@ -1716,9 +1716,9 @@ PUBLIC void task_fs()
 		case EXIT:
 			fs_msg.RETVAL = fs_exit();
 			break;
-		/* case STAT: */
-		/* 	fs_msg.RETVAL = do_stat(); */
-		/* 	break; */
+		case STAT: 
+		 	fs_msg.RETVAL = do_stat(); 
+		 	break;
 		default:
 			dump_msg("Fat16_FS::unknown message:", &fs_msg);
 			assert(0);
@@ -1788,7 +1788,7 @@ PRIVATE void mkfs()
 
 	fat16_init(&fat16, read_block, write_block);
 
-	fat16_format(&fat16);
+	//fat16_format(&fat16);
 
 	fat16_mount(&fat16);
 
@@ -1797,6 +1797,7 @@ PRIVATE void mkfs()
 	printl("         root_dir_start_block: #%d sector\n", fat16.root_dir_start_block);
 	printl("         data_start_block: #%d sector\n", fat16.data_start_block);
 
+	/*
 	struct fat16_file_t dev_tty0;
 	struct fat16_file_t dev_tty1;
 	struct fat16_file_t dev_tty2;
@@ -1812,6 +1813,26 @@ PRIVATE void mkfs()
 	fat16_file_close(&dev_tty0);
 	fat16_file_close(&dev_tty0);
 	fat16_file_close(&dev_tty0);
+	*/
+
+	struct fat16_stat_t echo;
+	struct fat16_stat_t pwd;
+
+	fat16_stat(&fat16, "echo", &echo);
+	fat16_stat(&fat16, "pwd", &pwd);
+	printl("\nCommand line bins\n");
+	printl("         echo size: %d bytes\n", echo.size);
+	printl("         pwd size: %d bytes\n\n", pwd.size);
+
+	/*struct fat16_file_t pwd_elf;
+	fat16_file_open(&fat16, &pwd_elf, "pwd", O_RDWR);
+	char rbuf[3];
+	int bytes_rw = fat16_file_read(&pwd_elf, rbuf, 3);
+	printl("         read size: %d bytes\n", bytes_rw);
+	printl("         read buf: %d %d %d\n\n", rbuf[0], rbuf[1], rbuf[2]);
+	fat16_file_close(&pwd_elf);*/
+	
+	
 }
 
 /*****************************************************************************

@@ -48,7 +48,7 @@ PUBLIC int do_rdwt()
 
 	struct fat16_file_t *file_p = pcaller->filp[fd]->fd_file;
 
-	if (fd < 3) {
+	if (fd < 2) {
 		int t = fs_msg.type == READ ? DEV_READ : DEV_WRITE;
 		fs_msg.type = t;
 
@@ -71,19 +71,26 @@ PUBLIC int do_rdwt()
 		int bytes_rw = 0;
 
 		if (fs_msg.type == READ) {
-			bytes_rw = fat16_file_read(file_p, fsbuf, len);
+			//printl("pos: %d\n",file_p->cur_position);
+			fat16_file_seek(file_p, 0, 0);
+
+			int size = file_p->file_size;
+			int i;
+			for(i=0;i<(size+511)/512;i++)
+			{
+				bytes_rw += fat16_file_read(file_p, fsbuf+i*512, 512);
+				phys_copy((void*)va2la(src, buf+i*512),
+				  	(void*)va2la(TASK_FS, fsbuf+i*512),
+				  	len);
+			}
+			
 			fsbuf[len]=0;
-			printl("fsbuf = %s\n", fsbuf);
-			phys_copy((void*)va2la(src, buf),
-				  (void*)va2la(TASK_FS, fsbuf),
-				  len);
 		}
 		else {	/* WRITE */
-			char wbuf[512];
+			char wbuf[10000];
 			phys_copy((void*)va2la(TASK_FS, wbuf),
 				  (void*)va2la(src, buf),
 				  len);
-			printl("fsbuf = %s\n", wbuf);
 			bytes_rw = fat16_file_write(file_p, wbuf, len);
 			fat16_file_sync(file_p);
 		}
